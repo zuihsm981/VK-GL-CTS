@@ -38,13 +38,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential ninja-build
 
+      # 关键修正：packages 改为空格分隔的单行字符串
       - name: Setup Android SDK with API 28
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platform-tools
-            platforms;android-28
-            build-tools;28.0.3
+          packages: 'platform-tools platforms;android-28 build-tools;28.0.3'
 
       - name: Install Android NDK
         run: |

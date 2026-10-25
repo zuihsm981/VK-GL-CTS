@@ -66,19 +66,27 @@ jobs:
           python3 external/fetch_sources.py
           python3 -m pip install lxml
 
-      - name: Build APK (${{ github.event.inputs.target_abi }}, Release)
+      - name: Build APK (${{ github.event.inputs.target_abi }}, Release, only deqp-vk)
         run: |
           python3 scripts/android/build_apk.py \
             --sdk "$ANDROID_HOME" \
             --ndk "$ANDROID_NDK_HOME" \
             --abis "${{ github.event.inputs.target_abi }}" \
-            --build-type Release
+            --build-type Release \
+            --cmake-option="-DSELECTED_BUILD_TARGETS=deqp-vk"
 
       - name: Locate generated APK
-        run: find . -name "*.apk" -type f
+        if: always()
+        run: |
+          echo "=== All APK files ==="
+          find . -name "*.apk" -type f || true
+          echo "=== Build directory tree (depth 3) ==="
+          find . -maxdepth 3 -type d -name "build*" -o -maxdepth 3 -type d -name "out" 2>/dev/null || true
 
       - name: Upload APK artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dEQP-apk-${{ github.event.inputs.target_abi }}
-          path: '**/dEQP.apk'
+          name: cts-apk-${{ github.event.inputs.target_abi }}
+          path: '**/*.apk'
+          if-no-files-found: warn

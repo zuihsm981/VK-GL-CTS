@@ -38,7 +38,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential ninja-build
 
-      # 关键修正：packages 改为空格分隔的单行字符串
       - name: Setup Android SDK with API 28
         uses: android-actions/setup-android@v3
         with:
@@ -67,12 +66,13 @@ jobs:
           python3 external/fetch_sources.py
           python3 -m pip install lxml
 
-      - name: Build APK (${{ github.event.inputs.target_abi }})
+      - name: Build APK (${{ github.event.inputs.target_abi }}, Release)
         run: |
           python3 scripts/android/build_apk.py \
             --sdk "$ANDROID_HOME" \
             --ndk "$ANDROID_NDK_HOME" \
-            --abis "${{ github.event.inputs.target_abi }}"
+            --abis "${{ github.event.inputs.target_abi }}" \
+            --build-type Release
 
       - name: Locate generated APK
         run: find . -name "*.apk" -type f

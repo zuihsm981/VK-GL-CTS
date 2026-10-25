@@ -10,8 +10,8 @@ on:
         type: choice
         options:
           - arm64-v8a
-          - armeabi-v7a   # 32位 ARM
-          - x86           # 32位 x86
+          - armeabi-v7a
+          - x86
           - x86_64
 
 jobs:
@@ -38,10 +38,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential ninja-build
 
-      - name: Setup Android SDK with API 28
+      - name: Setup Android SDK with API 34
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools platforms;android-28 build-tools;28.0.3'
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Install Android NDK
         run: |
@@ -66,26 +66,25 @@ jobs:
           python3 external/fetch_sources.py
           python3 -m pip install lxml
 
-      - name: Build APK (${{ github.event.inputs.target_abi }}, Release, only deqp-vk)
+      - name: Build APK (${{ github.event.inputs.target_abi }}, Release)
         run: |
           python3 scripts/android/build_apk.py \
             --sdk "$ANDROID_HOME" \
             --ndk "$ANDROID_NDK_HOME" \
             --abis "${{ github.event.inputs.target_abi }}" \
-            --native-build-type Release
+            --native-build-type Release \
+            --build-root "$GITHUB_WORKSPACE/build"
 
       - name: Locate generated APK
         if: always()
         run: |
-          echo "=== All APK files ==="
-          find . -name "*.apk" -type f || true
-          echo "=== Build directory tree (depth 3) ==="
-          find . -maxdepth 3 -type d -name "build*" -o -maxdepth 3 -type d -name "out" 2>/dev/null || true
+          echo "=== APK files under build/ ==="
+          find build -name "*.apk" -type f 2>/dev/null || true
 
       - name: Upload APK artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cts-apk-${{ github.event.inputs.target_abi }}
-          path: '**/*.apk'
+          path: 'build/package/*.apk'
           if-no-files-found: warn

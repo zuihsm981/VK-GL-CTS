@@ -72,8 +72,7 @@ jobs:
             --sdk "$ANDROID_HOME" \
             --ndk "$ANDROID_NDK_HOME" \
             --abis "${{ github.event.inputs.target_abi }}" \
-            --build-type Release \
-            --cmake-option="-DSELECTED_BUILD_TARGETS=deqp-vk"
+            --native-build-type Release
 
       - name: Locate generated APK
         if: always()
